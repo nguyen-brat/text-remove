@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Define variables to store arguments and flags
+root=$(pwd)
 src_path=""
 bbox_path="CRAFT-pytorch/result"
 save_path=""
@@ -34,9 +35,9 @@ PYTHONPATH=$(pwd) python3 draw_bb.py --src_img_path $src_path \
                                                   --bbox_img_path $bbox_path \
                                                   --save_img_path $save_path/mask
 
-# cd lama
-# export TORCH_HOME=$(pwd) && export PYTHONPATH=$(pwd)
-# python3 ./bin/predict.py refine=False model.path=$(pwd)/big-lama \
-#                           indir=../$save_path/mask \
-#                           outdir=../$save_path/result \
-#                           dataset.img_suffix=.png > /dev/null
+cd lama
+export TORCH_HOME=$(pwd) && export PYTHONPATH=$(pwd)
+python3 ./bin/predict.py refine=False model.path=$(pwd)/big-lama \
+                          indir=$root/$save_path/mask \
+                          outdir=$root/$save_path/result \
+                          dataset.img_suffix=.png > /dev/null
