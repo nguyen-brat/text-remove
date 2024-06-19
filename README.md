@@ -47,17 +47,15 @@ cd ..
 If you has large gpu you can enhance the result with refine feature you can go to lama/configs/prediction/default.yaml to change the number of gpu and run
 ```bash
 bash config/test_detection_refine.sh -s path/to/the/folder/remove/text \
-                                    -b path/to/the/bbox/folder \
                                     -t path/to/the/folder/saved/result
 ```
 Else you can run only in cpu with no refine feature
 ```bash
 bash config/text_detection.sh -s path/to/the/folder/remove/text \
-                                -b path/to/the/bbox/folder \
                                 -t path/to/the/folder/saved/result
 ```
 
 # Example run with cpu
 ```bash
-bash text_detection.sh -s test_folder -t target_test
+bash config/text_detection.sh -s test_folder -t target_test
 ```
