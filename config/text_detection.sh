@@ -28,7 +28,7 @@ fi
 cd CRAFT-pytorch
 PYTHONPATH=. TORCH_HOME=$(pwd)/CRAFT-pytorch python3 test.py --trained_model=craft_mlt_25k.pth \
                                                               --test_folder="../$src_path" \
-                                                              --cuda True
+                                                              --cuda False
 
 cd ..
 PYTHONPATH=$(pwd) python3 draw_bb.py --src_img_path $src_path \
@@ -37,7 +37,7 @@ PYTHONPATH=$(pwd) python3 draw_bb.py --src_img_path $src_path \
 
 cd lama
 export TORCH_HOME=$(pwd) && export PYTHONPATH=$(pwd)
-python3 ./bin/predict.py refine=False model.path=$(pwd)/big-lama \
+python3 ./bin/predict.py refine=True model.path=$(pwd)/big-lama \
                           indir=$root/$save_path/mask \
                           outdir=$root/$save_path/result \
                           dataset.img_suffix=.png > /dev/null

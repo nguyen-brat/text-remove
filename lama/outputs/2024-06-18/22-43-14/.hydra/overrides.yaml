@@ -1,5 +1,0 @@
-- refine=False
-- model.path=/home/nguyen/code/Cohota/Image-impainting/lama/big-lama
-- indir=../target_test/mask
-- outdir=../target_test/result
-- dataset.img_suffix=.png

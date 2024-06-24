@@ -84,10 +84,17 @@ def _l1_loss(
     return loss
 
 def _infer(
-    image : torch.Tensor, mask : torch.Tensor, 
-    forward_front : nn.Module, forward_rears : nn.Module, 
-    ref_lower_res : torch.Tensor, orig_shape : tuple, devices : list, 
-    scale_ind : int, n_iters : int=15, lr : float=0.002):
+        image : torch.Tensor,
+        mask : torch.Tensor, 
+        forward_front : nn.Module,
+        forward_rears : nn.Module, 
+        ref_lower_res : torch.Tensor,
+        orig_shape : tuple,
+        devices : list, 
+        scale_ind : int,
+        n_iters : int=15,
+        lr : float=0.002
+    ):
     """Performs inference with refinement at a given scale.
 
     Parameters
@@ -127,11 +134,12 @@ def _infer(
     with torch.no_grad():
         z1,z2 = forward_front(masked_image)
     # Inference
-    mask = mask.to(devices[-1])
+    mask = mask#.to(devices[-1])
     ekernel = torch.from_numpy(cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(15,15)).astype(bool)).float()
-    ekernel = ekernel.to(devices[-1])
-    image = image.to(devices[-1])
-    z1, z2 = z1.detach().to(devices[0]), z2.detach().to(devices[0])
+    ekernel = ekernel#.to(devices[-1])
+    image = image#.to(devices[-1])
+    z1 = z1.detach()#.to(devices[0])
+    z2 = z2.detach()#.to(devices[0])
     z1.requires_grad, z2.requires_grad = True, True
 
     optimizer = Adam([z1,z2], lr=lr)
@@ -142,13 +150,11 @@ def _infer(
         input_feat = (z1,z2)
         for idd, forward_rear in enumerate(forward_rears):
             output_feat = forward_rear(input_feat)
-            if idd < len(devices) - 1:
+            if idd < 0:
                 midz1, midz2 = output_feat
-                midz1, midz2 = midz1.to(devices[idd+1]), midz2.to(devices[idd+1])
                 input_feat = (midz1, midz2)
-            else:        
+            else:
                 pred = output_feat
-
         if ref_lower_res is None:
             break
         losses = {}
@@ -168,7 +174,6 @@ def _infer(
             del pred_downscaled
             del loss
             del pred
-    # "pred" is the prediction after Plug-n-Play module
     inpainted = mask * pred + (1 - mask) * image
     inpainted = inpainted.detach().cpu()
     return inpainted
@@ -226,9 +231,15 @@ def _get_image_mask_pyramid(batch : dict, min_side : int, max_scales : int, px_b
     return ls_images[::-1], ls_masks[::-1]
 
 def refine_predict(
-    batch : dict, inpainter : nn.Module, gpu_ids : str, 
-    modulo : int, n_iters : int, lr : float, min_side : int, 
-    max_scales : int, px_budget : int
+        batch : dict,
+        inpainter : nn.Module,
+        gpu_ids : str, 
+        modulo : int,
+        n_iters : int,
+        lr : float,
+        min_side : int, 
+        max_scales : int,
+        px_budget : int
     ):
     """Refines the inpainting of the network
 
@@ -263,7 +274,7 @@ def refine_predict(
     assert not inpainter.add_noise_kwargs
     assert inpainter.concat_mask
 
-    gpu_ids = [f'cuda:{gpuid}' for gpuid in gpu_ids.replace(" ","").split(",") if gpuid.isdigit()]
+    #gpu_ids = [f'cuda:{gpuid}' for gpuid in gpu_ids.replace(" ","").split(",") if gpuid.isdigit()]
     n_resnet_blocks = 0
     first_resblock_ind = 0
     found_first_resblock = False
@@ -273,20 +284,14 @@ def refine_predict(
             found_first_resblock = True
         elif not found_first_resblock:
             first_resblock_ind += 1
-    resblocks_per_gpu = n_resnet_blocks // len(gpu_ids)
 
-    devices = [torch.device(gpu_id) for gpu_id in gpu_ids]
+    devices = 'cpu'#[torch.device(gpu_id) for gpu_id in gpu_ids]
     
     # split the model into front, and rear parts    
     forward_front = inpainter.generator.model[0:first_resblock_ind]
-    forward_front.to(devices[0])
+    forward_front.to(devices)
     forward_rears = []
-    for idd in range(len(gpu_ids)):
-        if idd < len(gpu_ids) - 1:
-            forward_rears.append(inpainter.generator.model[first_resblock_ind + resblocks_per_gpu*(idd):first_resblock_ind+resblocks_per_gpu*(idd+1)]) 
-        else:
-            forward_rears.append(inpainter.generator.model[first_resblock_ind + resblocks_per_gpu*(idd):]) 
-        forward_rears[idd].to(devices[idd]) 
+    forward_rears.append(inpainter.generator.model[first_resblock_ind:].to(devices))
 
     ls_images, ls_masks = _get_image_mask_pyramid(
         batch, 
@@ -302,9 +307,6 @@ def refine_predict(
         mask = pad_tensor_to_modulo(mask, modulo)
         mask[mask >= 1e-8] = 1.0
         mask[mask < 1e-8] = 0.0
-        image, mask = move_to_device(image, devices[0]), move_to_device(mask, devices[0])
-        if image_inpainted is not None:
-            image_inpainted = move_to_device(image_inpainted, devices[-1])
         image_inpainted = _infer(image, mask, forward_front, forward_rears, image_inpainted, orig_shape, devices, ids, n_iters, lr)
         image_inpainted = image_inpainted[:,:,:orig_shape[0], :orig_shape[1]]
         # detach everything to save resources

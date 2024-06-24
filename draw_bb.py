@@ -4,6 +4,27 @@ from glob import glob
 import os
 from os.path import join as osp
 import warnings
+import numpy as np
+
+def draw_mask(origin, mask):
+    # np_img = np.array(origin)
+    # np_mask_img = np.array(mask)
+    # bool_mask_img = (np_mask_img == 255)
+    # np_img[bool_mask_img] = 255
+    # pillow_image = Image.fromarray(np_img, 'RGB')
+    rgb_array = np.array(origin)
+    mask_array = np.array(mask)
+
+    # Invert the mask (set 255 to 0 and vice versa) for element-wise multiplication
+    inverted_mask = 255 - mask_array
+
+    # Apply the mask using element-wise multiplication
+    masked_rgb = rgb_array * inverted_mask[..., None]
+
+    # Convert the masked array back to a PIL Image
+    masked_image = Image.fromarray(masked_rgb.astype(np.uint8), mode='RGB')
+
+    return masked_image
 
 def main(args):
     image_paths, bbox_file_paths, save_path = args.src_img_path, args.bbox_img_path, args.save_img_path
@@ -19,7 +40,7 @@ def main(args):
 
         # Create a drawing context for the mask
         draw = ImageDraw.Draw(masked_image)
-
+        #draw_merge = ImageDraw.Draw(image)
         # Read the bounding boxes from the text file
         with open(bbox_file_path, 'r') as file:
             for line in file:
@@ -30,11 +51,12 @@ def main(args):
                 polygon = [(coordinates[i], coordinates[i+1]) for i in range(0, len(coordinates), 2)]
                 # Draw the polygon for the mask
                 draw.polygon(polygon, fill=255)
+                #draw_merge.polygon(polygon, fill=0)
+        #image = draw_mask(image, masked_image)
         image_mask_saved_name = image_name + f"_mask{i:03d}.png"
         image_saved_name = image_name + ".png"
         masked_image.save(osp(save_path, image_mask_saved_name))
         image.save(osp(save_path, image_saved_name))
-    return None
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Arguments for fact verify Trainning")
@@ -43,4 +65,3 @@ if __name__ == "__main__":
     parser.add_argument("--save_img_path", type=str, help="folder path of bbox image")
     args = parser.parse_args()
     main(args=args)
-    # bash text_detection.sh -s test_folder -t target_test
