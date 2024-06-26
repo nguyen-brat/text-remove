@@ -27,6 +27,8 @@ fi
 
 cd CRAFT-pytorch
 PYTHONPATH=. TORCH_HOME=$(pwd)/CRAFT-pytorch python3 test.py --trained_model=craft_mlt_25k.pth \
+                                                              --refine \
+                                                              --refiner_model=craft_refiner_CTW1500.pth \
                                                               --test_folder="../$src_path" \
                                                               --cuda False
 

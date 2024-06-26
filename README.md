@@ -24,6 +24,7 @@ pip install hydra-core==1.1.0
 pip install omegaconf==2.1.2
 pip install albumentations==0.5.2
 pip install webdataset==0.2.86
+pip install gdown==5.2.0
 pip install pillow==6.1.0
 ```
 
@@ -32,6 +33,7 @@ pip install pillow==6.1.0
 ```bash
 cd CRAFT-pytorch
 wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1Jk4eGD7crsqCCg9C9VjCLkMN3ze8kutZ' -O "craft_mlt_25k.pth"
+gdown 1XSaFwBkOaFOdtk4Ane3DFyJGPRw6v5bO
 cd ..
 ```
 

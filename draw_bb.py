@@ -65,3 +65,4 @@ if __name__ == "__main__":
     parser.add_argument("--save_img_path", type=str, help="folder path of bbox image")
     args = parser.parse_args()
     main(args=args)
+    # bash config/text_detection.sh -s test_folder -t target_test

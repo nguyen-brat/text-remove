@@ -1,0 +1,5 @@
+- refine=False
+- model.path=/home/nguyen/code/Cohota/Image-impainting/lama/big-lama
+- indir=/home/nguyen/code/Cohota/Image-impainting/target_test/mask
+- outdir=/home/nguyen/code/Cohota/Image-impainting/target_test/result
+- dataset.img_suffix=.png
