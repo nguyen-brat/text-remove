@@ -1,8 +1,9 @@
 myenv
 notebook
 inpainted_image.png
-CRAFT-pytorch/craft_mlt_25k.pth
 craft_pytorch/craft_refiner_CTW1500.pth
+craft_pytorch/craft_mlt_25k.pth
 CRAFT-pytorch/result
 lama/big-lama
+lama/configs/places2-categories_157.txt
 mmocr
