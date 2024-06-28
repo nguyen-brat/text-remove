@@ -1,4 +1,5 @@
 # Set environment
+You need to clone this repo first and create conda virtual environment.
 ```bash
 git clone https://github.com/nguyen-brat/text-remove.git
 cd text-remove
@@ -30,12 +31,6 @@ cd ..
 ```
 
 # text detection with craft and remove with lama
-If you has large gpu you can enhance the result with refine feature you can go to lama/configs/prediction/default.yaml to change the number of gpu and run
-```bash
-bash config/test_detection_refine.sh -s path/to/the/folder/remove/text \
-                                    -t path/to/the/folder/saved/result
-```
-Else you can run only in cpu with no refine feature
 ```bash
 bash config/text_detection.sh -s path/to/the/folder/remove/text \
                                 -t path/to/the/folder/saved/result
@@ -45,3 +40,28 @@ bash config/text_detection.sh -s path/to/the/folder/remove/text \
 ```bash
 bash config/text_detection.sh -s test_folder -t target_test
 ```
+
+# Run app using streamlit
+
+```bash
+streamlit run app.py
+```
+
+# Folder structure
+
+### Description of Key Files and Directories
+
+- **config/**: Configuration files for the project.
+- **craft_pytorch/**: Contains code related to CRAFT text detector using PyTorch.
+- **image/**: Directory for storing image files used in the project.
+- **lama/**: Directory related to the LaMa inpainting model.
+- **mmocr/**: Contains files related to MMOCR (Multimodal OCR) toolkit.
+- **myenv/**: Virtual environment for the project dependencies.
+- **notebook/**: Jupyter notebooks for experimentation and prototyping.
+- **target_test/**: Directory for target test files.
+- **test_folder/**: Directory for test files.
+- **.gitignore**: Git ignore file to specify which files and directories should be ignored by Git.
+- **app.py**: Main application script.
+- **draw_bb.py**: Script for drawing bounding boxes.
+- **README.md**: The file you are currently reading.
+- **requirements.txt**: List of project dependencies.

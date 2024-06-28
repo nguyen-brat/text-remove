@@ -6,7 +6,7 @@ import io
 import shutil
 import time
 
-def run_bash_script(input_image_path, output_path, progress_placeholder):
+def run_bash_script(input_image_path, output_path, progress_placeholder, status_text):
     bash_command = f"bash config/text_detection.sh -s {input_image_path} -t {output_path}"
     process = subprocess.Popen(bash_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     
@@ -16,8 +16,14 @@ def run_bash_script(input_image_path, output_path, progress_placeholder):
         progress += 0.1
         progress_placeholder.progress(min(progress, 1.0))
     
+    # Capture and display stderr
+    stderr_output = process.stderr.read()
+    if stderr_output:
+        status_text.error("Error output:")
+        st.code(stderr_output, language="bash")
+    
     rc = process.wait()
-    return rc
+    return rc, stderr_output
 
 def zip_result_files(result_folder):
     zip_buffer = io.BytesIO()
@@ -58,7 +64,7 @@ if uploaded_file is not None:
         
         try:
             status_text.text("Running text detection...")
-            rc = run_bash_script(input_path, output_path, progress_placeholder)
+            rc, stderr_output = run_bash_script(input_path, output_path, progress_placeholder, status_text)
             
             if rc == 0:
                 status_text.text("Text detection completed successfully!")
@@ -78,6 +84,9 @@ if uploaded_file is not None:
                     st.error("Result folder not found. The text detection might have failed.")
             else:
                 st.error(f"Text detection failed with return code {rc}")
+                if stderr_output:
+                    st.error("Error details:")
+                    st.code(stderr_output, language="bash")
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
         finally:
