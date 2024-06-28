@@ -9,23 +9,7 @@ sudo apt-get install libjpeg-dev zlib1g-dev
 
 # Set up library
 ```bash
-pip install torch==2.3.1
-pip install torchvision==0.2.1
-pip install opencv-python==4.10.0
-pip install scikit-image==0.14.2
-pip install tqdm==4.66.4
-pip install yaml==6.0.1
-pip install easydict
-pip install scikit-learn==1.3.2
-pip install pandas==2.0.3
-pip install pytorch-lightning==2.3.0
-pip install kornia==0.7.2
-pip install hydra-core==1.1.0
-pip install omegaconf==2.1.2
-pip install albumentations==0.5.2
-pip install webdataset==0.2.86
-pip install gdown==5.2.0
-pip install pillow==6.1.0
+pip install -r requirements.txt
 ```
 
 # Set up Craft

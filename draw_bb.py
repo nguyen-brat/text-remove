@@ -61,7 +61,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Arguments for fact verify Trainning")
     parser.add_argument("--src_img_path", type=str, help="folder path of image need to detect text")
-    parser.add_argument("--bbox_img_path", default="CRAFT-pytorch/result", type=str, help="folder path of bbox image")
+    parser.add_argument("--bbox_img_path", default="craft_pytorch/result", type=str, help="folder path of bbox image")
     parser.add_argument("--save_img_path", type=str, help="folder path of bbox image")
     args = parser.parse_args()
     main(args=args)
