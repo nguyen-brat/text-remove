@@ -68,8 +68,7 @@ if uploaded_file is not None:
     # os.makedirs(osp(output_path, "mask"), exist_ok=True)
 
     input_file_path = os.path.join(input_path, uploaded_file.name)
-    image_data = uploaded_file.getvalue()
-    image = Image.open(image_data)
+    image = Image.open(uploaded_file)
     image.save(input_file_path)
     
     if st.button("Run Text Detection"):
