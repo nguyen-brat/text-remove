@@ -85,8 +85,8 @@ def create_temp_structure():
 
 st.title("Text Detection App")
 files = [f for f in os.listdir('.') if os.path.isfile(f)]
-files_name = " || ".join(files)
-st.write(file_names)
+file_name = " || ".join(files)
+st.write(file_name)
 uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
