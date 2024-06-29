@@ -81,9 +81,9 @@ if uploaded_file is not None:
     # Save the uploaded file temporarily
     input_path = "test_folder"
     output_path = "target_test"
-    # os.makedirs(input_path, exist_ok=True)
-    # os.makedirs(osp(output_path, "result"), exist_ok=True)
-    # os.makedirs(osp(output_path, "mask"), exist_ok=True)
+    os.makedirs(input_path, exist_ok=True)
+    os.makedirs(osp(output_path, "result"), exist_ok=True)
+    os.makedirs(osp(output_path, "mask"), exist_ok=True)
 
     input_file_path = os.path.join(input_path, uploaded_file.name)
     image = Image.open(uploaded_file)
@@ -95,9 +95,9 @@ if uploaded_file is not None:
         
         try:
             status_text.text("Running text detection...")
-            # os.makedirs(input_path, exist_ok=True)
-            # os.makedirs(osp(output_path, "result"), exist_ok=True)
-            # os.makedirs(osp(output_path, "mask"), exist_ok=True)
+            os.makedirs(input_path, exist_ok=True)
+            os.makedirs(osp(output_path, "result"), exist_ok=True)
+            os.makedirs(osp(output_path, "mask"), exist_ok=True)
             rc, stderr_output = run_bash_script(input_path, output_path, progress_placeholder, status_text)
             
             if rc == 0:
