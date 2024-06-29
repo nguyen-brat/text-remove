@@ -95,7 +95,8 @@ if uploaded_file is not None:
             st.error(f"An error occurred: {str(e)}")
         finally:
             # Clean up temporary files
-            shutil.rmtree(osp(output_path, "mask"), ignore_errors=True)
+            shutil.rmtree(osp(input_path, "*"), ignore_errors=True)
+            shutil.rmtree(osp(output_path, "mask/*"), ignore_errors=True)
             progress_placeholder.empty()
             status_text.empty()
 
