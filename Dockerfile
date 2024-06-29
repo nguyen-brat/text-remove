@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean
 
 WORKDIR $HOME/app
-COPY --chown=user . $HOME/app
+#COPY --chown=user . $HOME/app
 # Create .streamlit/config.toml file
 RUN mkdir -p /app/.streamlit && \
     echo "[server]\nenableXsrfProtection = false\nenableCORS = false" > /app/.streamlit/config.toml
@@ -38,20 +38,20 @@ RUN git clone https://github.com/nguyen-brat/text-remove.git $HOME/app
 
 # Set the working directory to the cloned repo
 WORKDIR $HOME/app/text-remove
-COPY --chown=user . $HOME/app/text-remove
+#COPY --chown=user . $HOME/app/text-remove
 RUN mkdir -p $HOME/app/text-remove/.streamlit && \
     echo "[server]\nenableXsrfProtection = false\nenableCORS = false" > $HOME/app/text-remove/.streamlit/config.toml
 
 # Set up Craft
 WORKDIR $HOME/app/text-remove/CRAFT-pytorch
-COPY --chown=user . $HOME/app/text-remove/CRAFT-pytorch
+#COPY --chown=user . $HOME/app/text-remove/CRAFT-pytorch
 RUN wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1Jk4eGD7crsqCCg9C9VjCLkMN3ze8kutZ' -O "craft_mlt_25k.pth"
 RUN pip install gdown
 RUN gdown 1XSaFwBkOaFOdtk4Ane3DFyJGPRw6v5bO
 
 # Set up lama
 WORKDIR $HOME/app/text-remove/lama
-COPY --chown=user . $HOME/app/text-remove/lama
+#COPY --chown=user . $HOME/app/text-remove/lama
 RUN curl -LJO https://huggingface.co/smartywu/big-lama/resolve/main/big-lama.zip
 RUN unzip big-lama.zip
 
