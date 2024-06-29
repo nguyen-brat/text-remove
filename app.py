@@ -6,7 +6,25 @@ import zipfile
 import io
 import shutil
 import time
+import sys
 from PIL import Image
+
+def GET_PROJECT_ROOT():
+    count = 0
+    # goto the root folder of LogBar
+    current_abspath = os.path.abspath(__file__)
+    while True:
+        if count > 1000:
+            print("Can find root error")
+            sys.exit()
+        if os.path.split(current_abspath)[1] == 'text-remove':
+            project_root = current_abspath
+            break
+        else:
+            current_abspath = os.path.dirname(current_abspath)
+    return project_root
+
+PROJECT_ROOT = GET_PROJECT_ROOT()
 
 def run_bash_script(input_image_path, output_path, progress_placeholder, status_text):
     bash_command = f"bash config/text_detection.sh -s {input_image_path} -t {output_path}"
@@ -69,7 +87,7 @@ if uploaded_file is not None:
 
     input_file_path = os.path.join(input_path, uploaded_file.name)
     image = Image.open(uploaded_file)
-    image.save(input_file_path)
+    image.save(os.path.join(PROJECT_ROOT, input_file_path))
     
     if st.button("Run Text Detection"):
         progress_placeholder = st.empty()
