@@ -34,7 +34,7 @@ RUN mkdir -p /app/.streamlit && \
     echo "[server]\nenableXsrfProtection = false\nenableCORS = false" > /app/.streamlit/config.toml
 
 # Clone the repository
-RUN git clone https://github.com/nguyen-brat/text-remove.git $HOME/app
+RUN git clone https://github.com/nguyen-brat/text-remove.git .
 
 # Set the working directory to the cloned repo
 WORKDIR $HOME/app/text-remove
@@ -55,8 +55,8 @@ WORKDIR $HOME/app/text-remove/lama
 RUN curl -LJO https://huggingface.co/smartywu/big-lama/resolve/main/big-lama.zip
 RUN unzip big-lama.zip
 
-RUN chmod 777 $HOME/app/text-remove/target_test
-RUN chmod 777 $HOME/app/text-remove/test_folder
+#RUN chmod 777 $HOME/app/text-remove/target_test
+#RUN chmod 777 $HOME/app/text-remove/test_folder
 
 # RUN useradd -m -u 1000 user
 # USER user
