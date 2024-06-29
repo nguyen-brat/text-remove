@@ -26,7 +26,7 @@ def GET_PROJECT_ROOT():
     return project_root
 
 def run_bash_script(input_image_path, output_path, progress_placeholder, status_text):
-    bash_command = f"bash app/text-remove/config/text_detection.sh -s {input_image_path} -t {output_path}"
+    bash_command = f"bash config/text_detection.sh -s {input_image_path} -t {output_path}"
     process = subprocess.Popen(bash_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     
     progress = 0
