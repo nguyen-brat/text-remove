@@ -8,6 +8,7 @@ import shutil
 import time
 import sys
 from PIL import Image
+import tempfile
 
 def GET_PROJECT_ROOT():
     count = 0
@@ -68,6 +69,21 @@ def clear_folder(folder_path):
                 shutil.rmtree(file_path, ignore_errors=True)  # Remove directory and its contents
         except Exception as e:
             print(f'Failed to delete {file_path}. Reason: {e}')
+            
+def create_temp_structure():
+    # Create a temporary directory
+    temp_dir = tempfile.mkdtemp()
+    
+    # Create test_folder
+    test_folder = os.path.join(temp_dir, "test_folder")
+    os.makedirs(test_folder, exist_ok=True)
+    
+    # Create target_folder with mask and result subdirectories
+    target_folder = os.path.join(temp_dir, "target_folder")
+    os.makedirs(os.path.join(target_folder, "mask"), exist_ok=True)
+    os.makedirs(os.path.join(target_folder, "result"), exist_ok=True)
+    
+    return temp_dir, test_folder, target_folder
 
 st.title("Text Detection App")
 
@@ -79,15 +95,17 @@ if uploaded_file is not None:
     # Create a temporary directory for processing
     
     # Save the uploaded file temporarily
-    input_path = "test_folder"
-    output_path = "target_test"
-    os.makedirs(input_path, exist_ok=True)
-    os.makedirs(osp(output_path, "result"), exist_ok=True)
-    os.makedirs(osp(output_path, "mask"), exist_ok=True)
+    _, input_path, output_path = create_temp_structure()
+    # input_path = "test_folder"
+    # output_path = "target_test"
+    # os.makedirs(input_path, exist_ok=True)
+    # os.makedirs(osp(output_path, "result"), exist_ok=True)
+    # os.makedirs(osp(output_path, "mask"), exist_ok=True)
 
     input_file_path = os.path.join(input_path, uploaded_file.name)
     image = Image.open(uploaded_file)
-    image.save(os.path.join(PROJECT_ROOT, input_file_path))
+    # image.save(os.path.join(PROJECT_ROOT, input_file_path))
+    image.save(input_file_path)
     
     if st.button("Run Text Detection"):
         progress_placeholder = st.empty()
@@ -95,9 +113,9 @@ if uploaded_file is not None:
         
         try:
             status_text.text("Running text detection...")
-            os.makedirs(input_path, exist_ok=True)
-            os.makedirs(osp(output_path, "result"), exist_ok=True)
-            os.makedirs(osp(output_path, "mask"), exist_ok=True)
+            #os.makedirs(input_path, exist_ok=True)
+            #os.makedirs(osp(output_path, "result"), exist_ok=True)
+            #os.makedirs(osp(output_path, "mask"), exist_ok=True)
             rc, stderr_output = run_bash_script(input_path, output_path, progress_placeholder, status_text)
             
             if rc == 0:
