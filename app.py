@@ -6,6 +6,7 @@ import zipfile
 import io
 import shutil
 import time
+from PIL import Image
 
 def run_bash_script(input_image_path, output_path, progress_placeholder, status_text):
     bash_command = f"bash config/text_detection.sh -s {input_image_path} -t {output_path}"
@@ -67,8 +68,9 @@ if uploaded_file is not None:
     # os.makedirs(osp(output_path, "mask"), exist_ok=True)
 
     input_file_path = os.path.join(input_path, uploaded_file.name)
-    with open(input_file_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
+    image_data = uploaded_file.getvalue()
+    image = Image.open(image_data)
+    image.save(input_file_path)
     
     if st.button("Run Text Detection"):
         progress_placeholder = st.empty()
