@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+from os.path import join as osp
 import subprocess
 import zipfile
 import io
@@ -46,17 +47,17 @@ if uploaded_file is not None:
     st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
     
     # Create a temporary directory for processing
-    temp_dir = "temp_processing"
-    os.makedirs(temp_dir, exist_ok=True)
     
     # Save the uploaded file temporarily
-    input_path = os.path.join(temp_dir, "input")
+    input_path = "test_folder"
+    output_path = "target_test"
     os.makedirs(input_path, exist_ok=True)
+    os.makedirs(osp(output_path, "result"), exist_ok=True)
+    os.makedirs(osp(output_path, "mask"), exist_ok=True)
+
     input_file_path = os.path.join(input_path, uploaded_file.name)
     with open(input_file_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
-    
-    output_path = os.path.join(temp_dir, "output")
     
     if st.button("Run Text Detection"):
         progress_placeholder = st.empty()
@@ -64,6 +65,9 @@ if uploaded_file is not None:
         
         try:
             status_text.text("Running text detection...")
+            os.makedirs(input_path, exist_ok=True)
+            os.makedirs(osp(output_path, "result"), exist_ok=True)
+            os.makedirs(osp(output_path, "mask"), exist_ok=True)
             rc, stderr_output = run_bash_script(input_path, output_path, progress_placeholder, status_text)
             
             if rc == 0:
@@ -91,7 +95,7 @@ if uploaded_file is not None:
             st.error(f"An error occurred: {str(e)}")
         finally:
             # Clean up temporary files
-            shutil.rmtree(temp_dir, ignore_errors=True)
+            shutil.rmtree(osp(output_path, "mask"), ignore_errors=True)
             progress_placeholder.empty()
             status_text.empty()
 

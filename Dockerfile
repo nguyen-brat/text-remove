@@ -3,19 +3,44 @@ FROM python:3.8
 
 # Set the working directory in the container
 WORKDIR /app
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libjpeg-dev \
-    zlib1g-dev \
+    build-essential \
+    cmake \
     curl \
-    unzip \
+    ca-certificates \
+    gcc \
+    git \
+    git-lfs \
     wget \
-    git
+    libpq-dev \
+    libsndfile1-dev \
+    libgl1 \
+    unzip \
+    libjpeg-dev \
+    libpng-dev \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+WORKDIR /app
+
+# Create .streamlit/config.toml file
+RUN mkdir -p /app/.streamlit && \
+    echo "[server]\nenableXsrfProtection = false\nenableCORS = false" > /app/.streamlit/config.toml
 
 # Clone the repository
-RUN git clone https://github.com/nguyen-brat/text-remove.git .
+RUN git clone https://github.com/nguyen-brat/text-remove.git /app/text-remove
+
+# Set the working directory to the cloned repo
 WORKDIR /app/text-remove
+
+RUN mkdir -p /app/text-remove/.streamlit && \
+    echo "[server]\nenableXsrfProtection = false\nenableCORS = false" > /app/text-remove/.streamlit/config.toml
+
 # Install Python dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Set up Craft
@@ -32,8 +57,10 @@ RUN unzip big-lama.zip
 # Set the working directory back to the root of the project
 WORKDIR /app/text-remove
 
-# Make port 8501 available to the world outside this container
-EXPOSE 8501
+# Make port 7860 available to the world outside this container
+EXPOSE 7860
 
 # Run app.py when the container launches
-CMD ["streamlit", "run", "app.py"]
+ENTRYPOINT ["streamlit", "run"]
+CMD ["app.py", "--server.port=7860"]
+# CMD ["streamlit", "run", "app.py", "--server.port=7860", "--server.address=0.0.0.0"]
