@@ -10,7 +10,7 @@ import sys
 from PIL import Image
 import tempfile
 
-os.environ["HYDRA_FULL_ERROR"] = 1
+os.environ["HYDRA_FULL_ERROR"] = "1"
 
 def GET_PROJECT_ROOT():
     count = 0
