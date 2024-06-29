@@ -10,6 +10,8 @@ import sys
 from PIL import Image
 import tempfile
 
+os.environ["HYDRA_FULL_ERROR"] = 1
+
 def GET_PROJECT_ROOT():
     count = 0
     # goto the root folder of LogBar
@@ -95,8 +97,6 @@ if uploaded_file is not None:
     
     # Save the uploaded file temporarily
     _, input_path, output_path = create_temp_structure()
-    # input_path = "test_folder"
-    # output_path = "target_test"
     # os.makedirs(input_path, exist_ok=True)
     # os.makedirs(osp(output_path, "result"), exist_ok=True)
     # os.makedirs(osp(output_path, "mask"), exist_ok=True)

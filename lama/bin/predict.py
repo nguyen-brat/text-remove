@@ -70,7 +70,7 @@ def main(predict_config: OmegaConf):
             predict_config.outdir, 
             os.path.splitext(mask_fname[len(predict_config.indir):])[0] + out_ext
         )
-        os.makedirs(os.path.dirname(cur_out_fname), exist_ok=True)
+        #os.makedirs(os.path.dirname(cur_out_fname), exist_ok=True)
         batch = default_collate([dataset[img_i]])
         if predict_config.get('refine', False):
             assert 'unpad_to_size' in batch, "Unpadded size is required for the refinement"

@@ -28,7 +28,7 @@ def draw_mask(origin, mask):
 
 def main(args):
     image_paths, bbox_file_paths, save_path = args.src_img_path, args.bbox_img_path, args.save_img_path
-    os.makedirs(save_path, exist_ok=True)
+    #os.makedirs(save_path, exist_ok=True)
     # Open the image
     image_paths = glob(image_paths + "/*")
     for i, image_path in enumerate(image_paths):
