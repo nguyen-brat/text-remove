@@ -26,7 +26,7 @@ def GET_PROJECT_ROOT():
     return project_root
 
 def run_bash_script(input_image_path, output_path, progress_placeholder, status_text):
-    bash_command = f"bash config/text_detection.sh -s {input_image_path} -t {output_path}"
+    bash_command = f"bash app/text-remove/config/text_detection.sh -s {input_image_path} -t {output_path}"
     process = subprocess.Popen(bash_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     
     progress = 0
@@ -84,8 +84,6 @@ def create_temp_structure():
     return temp_dir, test_folder, target_folder
 
 st.title("Text Detection App")
-cwd = os.getcwd()
-st.write(f"the current working dir is {cwd}")
 uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
