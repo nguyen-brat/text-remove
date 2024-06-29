@@ -39,9 +39,27 @@ def zip_result_files(result_folder):
     
     return zip_buffer
 
+def clear_folder(folder_path):
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)  # Remove file or symlink
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path, ignore_errors=True)  # Remove directory and its contents
+        except Exception as e:
+            print(f'Failed to delete {file_path}. Reason: {e}')
+
 st.title("Text Detection App")
 
 uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
+
+if uploaded_file is not None:
+    input_path = "test_folder"
+    output_path = "target_test"
+    input_file_path = os.path.join(input_path, uploaded_file.name)
+    with open(input_file_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
 
 if uploaded_file is not None:
     st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
@@ -56,8 +74,6 @@ if uploaded_file is not None:
     os.makedirs(osp(output_path, "mask"), exist_ok=True)
 
     input_file_path = os.path.join(input_path, uploaded_file.name)
-    with open(input_file_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
     
     if st.button("Run Text Detection"):
         progress_placeholder = st.empty()
@@ -95,8 +111,7 @@ if uploaded_file is not None:
             st.error(f"An error occurred: {str(e)}")
         finally:
             # Clean up temporary files
-            shutil.rmtree(osp(input_path, "*"), ignore_errors=True)
-            shutil.rmtree(osp(output_path, "mask/*"), ignore_errors=True)
+            clear_folder(osp(output_path, "mask"))
             progress_placeholder.empty()
             status_text.empty()
 
