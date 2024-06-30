@@ -97,7 +97,8 @@ if uploaded_file is not None:
     # Create a temporary directory for processing
     
     # Save the uploaded file temporarily
-    _, input_path, output_path = create_temp_structure()
+    temp_dir, input_path, output_path = create_temp_structure()
+    st.write(f"Temp dir: {temp_dir}")
     # os.makedirs(input_path, exist_ok=True)
     # os.makedirs(osp(output_path, "result"), exist_ok=True)
     # os.makedirs(osp(output_path, "mask"), exist_ok=True)

@@ -35,8 +35,15 @@ from saicinpainting.utils import register_debug_signal_handlers
 LOGGER = logging.getLogger(__name__)
 
 
-@hydra.main(config_path='../configs/prediction', config_name='default.yaml')
-def main(predict_config: OmegaConf):
+#@hydra.main(config_path='../configs/prediction', config_name='default.yaml')
+def main(
+        #predict_config: OmegaConf# = hydra.utils.to_absolute_path('./configs/prediction/default.yaml')
+):
+    predict_config = OmegaConf.load('configs/prediction/default.yaml')
+
+    # Merge with command line arguments
+    cli_config = OmegaConf.from_cli()
+    predict_config = OmegaConf.merge(predict_config, cli_config)
     try:
         if sys.platform != 'win32':
             register_debug_signal_handlers()  # kill -10 <pid> will result in traceback dumped into log
