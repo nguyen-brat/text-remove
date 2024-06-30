@@ -107,6 +107,8 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file)
     # image.save(os.path.join(PROJECT_ROOT, input_file_path))
     image.save(input_file_path)
+    file_name = " || ".join(os.listdir(f'{temp_dir}'))
+    st.write(file_name)
     
     if st.button("Run Text Detection"):
         progress_placeholder = st.empty()
@@ -148,10 +150,10 @@ if uploaded_file is not None:
             progress_placeholder.empty()
             status_text.empty()
 
-file_namea = " || ".join(os.listdir(f'{temp_dir}/mask'))
-file_nameb = " || ".join(os.listdir(f'{temp_dir}/result'))
-file_namec = " || ".join(os.listdir(f'{temp_dir}/bbox'))
-st.write(file_namea)
-st.write(file_nameb)
-st.write(file_namec)
+    file_namea = " || ".join(os.listdir(f'{temp_dir}/mask'))
+    file_nameb = " || ".join(os.listdir(f'{temp_dir}/result'))
+    file_namec = " || ".join(os.listdir(f'{temp_dir}/bbox'))
+    st.write(file_namea)
+    st.write(file_nameb)
+    st.write(file_namec)
 st.write("Note: The download button will appear after running text detection.")
