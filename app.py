@@ -87,8 +87,8 @@ def create_temp_structure():
     return temp_dir, test_folder, target_folder
 
 st.title("Text Detection App")
-file_name = " || ".join(os.listdir('craft_pytorch'))
-st.write(file_name)
+# file_name = " || ".join(os.listdir('craft_pytorch'))
+# st.write(file_name)
 uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
@@ -148,4 +148,10 @@ if uploaded_file is not None:
             progress_placeholder.empty()
             status_text.empty()
 
+file_namea = " || ".join(os.listdir(f'{temp_dir}/mask'))
+file_nameb = " || ".join(os.listdir(f'{temp_dir}/result'))
+file_namec = " || ".join(os.listdir(f'{temp_dir}/bbox'))
+st.write(file_namea)
+st.write(file_nameb)
+st.write(file_namec)
 st.write("Note: The download button will appear after running text detection.")
