@@ -82,6 +82,7 @@ def create_temp_structure():
     target_folder = os.path.join(temp_dir, "target_folder")
     os.makedirs(os.path.join(target_folder, "mask"), exist_ok=True)
     os.makedirs(os.path.join(target_folder, "result"), exist_ok=True)
+    os.makedirs(os.path.join(target_folder, "bbox"), exist_ok=True)
     
     return temp_dir, test_folder, target_folder
 
