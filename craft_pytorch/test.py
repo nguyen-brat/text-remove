@@ -168,5 +168,7 @@ if __name__ == '__main__':
         cv2.imwrite(mask_file, score_text)
 
         file_utils.saveResult(image_path, image[:,:,::-1], polys, dirname=result_folder)
-
+    print(f'result folder of craft is {result_folder}')
+    file_name = " || ".join(os.listdir('result_folder'))
+    print(file_name)
     print("elapsed time : {}s".format(time.time() - t))

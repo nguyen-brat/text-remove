@@ -5,12 +5,26 @@ import subprocess
 import zipfile
 import io
 import shutil
-import time
 import sys
 from PIL import Image
 import tempfile
 
 os.environ["HYDRA_FULL_ERROR"] = "1"
+
+def GET_PROJECT_ROOT():
+    count = 0
+    # goto the root folder of LogBar
+    current_abspath = os.path.abspath(__file__)
+    while True:
+        if count > 1000:
+            print("Can find root error")
+            sys.exit()
+        if os.path.split(current_abspath)[1] == 'text-remove':
+            project_root = current_abspath
+            break
+        else:
+            current_abspath = os.path.dirname(current_abspath)
+    return project_root
 
 def run_bash_script(input_image_path, output_path, progress_placeholder, status_text):
     bash_command = f"bash config/text_detection.sh -s {input_image_path} -t {output_path}"
@@ -22,6 +36,7 @@ def run_bash_script(input_image_path, output_path, progress_placeholder, status_
         progress += 0.1
         progress_placeholder.progress(min(progress, 1.0))
     
+    # Capture and display stderr
     stderr_output = process.stderr.read()
     if stderr_output:
         status_text.error("Error output:")
@@ -43,6 +58,17 @@ def zip_result_files(result_folder):
     
     return zip_buffer
 
+def clear_folder(folder_path):
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)  # Remove file or symlink
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path, ignore_errors=True)  # Remove directory and its contents
+        except Exception as e:
+            print(f'Failed to delete {file_path}. Reason: {e}')
+            
 def create_temp_structure():
     # Create a temporary directory
     temp_dir = tempfile.mkdtemp()
@@ -59,83 +85,61 @@ def create_temp_structure():
     
     return temp_dir, test_folder, target_folder
 
-def clear_temp_folder(temp_dir):
-    if temp_dir and os.path.exists(temp_dir):
-        shutil.rmtree(temp_dir, ignore_errors=True)
-        st.success("Temporary files have been cleared.")
-
 st.title("Text Detection App")
-
-# Use session state to store the temporary directory path
-if 'temp_dir' not in st.session_state:
-    st.session_state.temp_dir = None
-
+# file_name = " || ".join(os.listdir('craft_pytorch'))
+# st.write(file_name)
 uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
     
-    # Create a temporary directory for processing if it doesn't exist
-    if not st.session_state.temp_dir:
-        temp_dir, input_path, output_path = create_temp_structure()
-        st.session_state.temp_dir = temp_dir
-        st.session_state.input_path = input_path
-        st.session_state.output_path = output_path
-    else:
-        temp_dir = st.session_state.temp_dir
-        input_path = st.session_state.input_path
-        output_path = st.session_state.output_path
-
-    st.write(f"Temp dir: {temp_dir}")
+    # Create a temporary directory for processing
+    
+    # Save the uploaded file temporarily
+    temp_dir, input_path, output_path = create_temp_structure()
+    # st.write(f"Temp dir: {temp_dir}")
+    # os.makedirs(input_path, exist_ok=True)
+    # os.makedirs(osp(output_path, "result"), exist_ok=True)
+    # os.makedirs(osp(output_path, "mask"), exist_ok=True)
 
     input_file_path = os.path.join(input_path, uploaded_file.name)
     image = Image.open(uploaded_file)
+    # image.save(os.path.join(PROJECT_ROOT, input_file_path))
     image.save(input_file_path)
-    
-    if st.button("Run Text Detection"):
-        progress_placeholder = st.empty()
-        status_text = st.empty()
-        
-        try:
-            status_text.text("Running text detection...")
-            rc, stderr_output = run_bash_script(input_path, output_path, progress_placeholder, status_text)
-            if rc == 0:
-                status_text.text("Text detection completed successfully!")
-                result_folder = os.path.join(output_path, "result")
-                if os.path.exists(result_folder):
-                    st.write("You can now download the results.")
-                    
-                    # Add download button
-                    zip_buffer = zip_result_files(result_folder)
-                    st.download_button(
-                        label="Download Results",
-                        data=zip_buffer.getvalue(),
-                        file_name="text_detection_results.zip",
-                        mime="application/zip",
-                        on_click=lambda: clear_temp_folder(st.session_state.temp_dir)
-                    )
-                else:
-                    st.error("Result folder not found. The text detection might have failed.")
-            else:
-                st.error(f"Text detection failed with return code {rc}")
-                if stderr_output:
-                    st.error("Error details:")
-                    st.code(stderr_output, language="bash")
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
-        finally:
-            progress_placeholder.empty()
-            status_text.empty()
+    # file_name = " || ".join(os.listdir(f'{temp_dir}/target_folder'))
+    # st.write(file_name)
 
-    # Display directory contents for debugging
-    if st.session_state.temp_dir:
-        st.write(f"Contents of temp directory:")
-        for root, dirs, files in os.walk(st.session_state.temp_dir):
-            level = root.replace(st.session_state.temp_dir, '').count(os.sep)
-            indent = ' ' * 4 * (level)
-            st.write(f"{indent}{os.path.basename(root)}/")
-            subindent = ' ' * 4 * (level + 1)
-            for f in files:
-                st.write(f"{subindent}{f}")
+
+    progress_placeholder = st.empty()
+    status_text = st.empty()
+    
+    status_text.text("Running text detection...")
+    st.write(f'the input file path {input_path}')
+    st.write(f'the output file path {output_path}')
+    #os.makedirs(input_path, exist_ok=True)
+    #os.makedirs(osp(output_path, "result"), exist_ok=True)
+    #os.makedirs(osp(output_path, "mask"), exist_ok=True)
+    rc, stderr_output = run_bash_script(input_path, output_path, progress_placeholder, status_text)
+    if rc == 0:
+        st.write("Text detection completed successfully!")
+        status_text.text("Text detection completed successfully!")
+        result_folder = os.path.join(output_path, "result")
+        if os.path.exists(result_folder):
+            st.write("You can now download the results.")
+            # Add download button
+            zip_buffer = zip_result_files(result_folder)
+            st.download_button(
+                label="Download Results",
+                data=zip_buffer.getvalue(),
+                file_name="text_detection_results.zip",
+                mime="application/zip"
+            )
+        else:
+            st.error("Result folder not found. The text detection might have failed.")
+    else:
+        st.error(f"Text detection failed with return code {rc}")
+        if stderr_output:
+            st.error("Error details:")
+            st.code(stderr_output, language="bash")
 
 st.write("Note: The download button will appear after running text detection.")
