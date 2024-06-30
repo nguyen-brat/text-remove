@@ -5,10 +5,10 @@ import subprocess
 import zipfile
 import io
 import shutil
-import time
 import sys
 from PIL import Image
 import tempfile
+import uuid
 
 os.environ["HYDRA_FULL_ERROR"] = "1"
 
@@ -70,21 +70,24 @@ def clear_folder(folder_path):
         except Exception as e:
             print(f'Failed to delete {file_path}. Reason: {e}')
             
-def create_temp_structure():
-    # Create a temporary directory
-    temp_dir = tempfile.mkdtemp()
+def create_persistent_structure():
+    # Create a unique directory name
+    unique_id = str(uuid.uuid4())
+    
+    # Create a persistent directory in the current working directory
+    persistent_dir = os.path.join(os.getcwd(), f"processing_{unique_id}")
     
     # Create test_folder
-    test_folder = os.path.join(temp_dir, "test_folder")
+    test_folder = os.path.join(persistent_dir, "test_folder")
     os.makedirs(test_folder, exist_ok=True)
     
     # Create target_folder with mask and result subdirectories
-    target_folder = os.path.join(temp_dir, "target_folder")
+    target_folder = os.path.join(persistent_dir, "target_folder")
     os.makedirs(os.path.join(target_folder, "mask"), exist_ok=True)
     os.makedirs(os.path.join(target_folder, "result"), exist_ok=True)
     os.makedirs(os.path.join(target_folder, "bbox"), exist_ok=True)
     
-    return temp_dir, test_folder, target_folder
+    return persistent_dir, test_folder, target_folder
 
 st.title("Text Detection App")
 # file_name = " || ".join(os.listdir('craft_pytorch'))
@@ -94,31 +97,20 @@ uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "p
 if uploaded_file is not None:
     st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
     
-    # Create a temporary directory for processing
-    
-    # Save the uploaded file temporarily
-    temp_dir, input_path, output_path = create_temp_structure()
-    st.write(f"Temp dir: {temp_dir}")
-    # os.makedirs(input_path, exist_ok=True)
-    # os.makedirs(osp(output_path, "result"), exist_ok=True)
-    # os.makedirs(osp(output_path, "mask"), exist_ok=True)
+    # Create a persistent directory for processing
+    persistent_dir, input_path, output_path = create_persistent_structure()
+    st.write(f"Processing directory: {persistent_dir}")
 
     input_file_path = os.path.join(input_path, uploaded_file.name)
     image = Image.open(uploaded_file)
-    # image.save(os.path.join(PROJECT_ROOT, input_file_path))
     image.save(input_file_path)
-    file_name = " || ".join(os.listdir(f'{temp_dir}/target_folder'))
-    st.write(file_name)
-    
+
     if st.button("Run Text Detection"):
         progress_placeholder = st.empty()
         status_text = st.empty()
         
         try:
             status_text.text("Running text detection...")
-            #os.makedirs(input_path, exist_ok=True)
-            #os.makedirs(osp(output_path, "result"), exist_ok=True)
-            #os.makedirs(osp(output_path, "mask"), exist_ok=True)
             rc, stderr_output = run_bash_script(input_path, output_path, progress_placeholder, status_text)
             if rc == 0:
                 status_text.text("Text detection completed successfully!")
@@ -132,14 +124,9 @@ if uploaded_file is not None:
                         label="Download Results",
                         data=zip_buffer.getvalue(),
                         file_name="text_detection_results.zip",
-                        mime="application/zip"
+                        mime="application/zip",
+                        on_click=lambda: clear_folder(persistent_dir)
                     )
-                    file_namea = " || ".join(os.listdir(f'{temp_dir}/target_folder/mask'))
-                    file_nameb = " || ".join(os.listdir(f'{temp_dir}/target_folder/bbox'))
-                    file_namec = " || ".join(os.listdir(f'{temp_dir}/target_folder/result'))
-                    st.write(file_namea)
-                    st.write(file_nameb)
-                    st.write(file_namec)
                 else:
                     st.error("Result folder not found. The text detection might have failed.")
             else:
@@ -150,15 +137,17 @@ if uploaded_file is not None:
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
         finally:
-            # Clean up temporary files
-            clear_folder(osp(output_path, "mask"))
             progress_placeholder.empty()
             status_text.empty()
 
-    file_namea = " || ".join(os.listdir(f'{temp_dir}/mask'))
-    file_nameb = " || ".join(os.listdir(f'{temp_dir}/result'))
-    file_namec = " || ".join(os.listdir(f'{temp_dir}/bbox'))
-    st.write(file_namea)
-    st.write(file_nameb)
-    st.write(file_namec)
+    # Display directory contents for debugging
+    st.write(f"Contents of {persistent_dir}:")
+    for root, dirs, files in os.walk(persistent_dir):
+        level = root.replace(persistent_dir, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        st.write(f"{indent}{os.path.basename(root)}/")
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            st.write(f"{subindent}{f}")
+
 st.write("Note: The download button will appear after running text detection.")
