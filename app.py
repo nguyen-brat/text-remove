@@ -59,15 +59,33 @@ def create_temp_structure():
     
     return temp_dir, test_folder, target_folder
 
+def clear_temp_folder(temp_dir):
+    if temp_dir and os.path.exists(temp_dir):
+        shutil.rmtree(temp_dir, ignore_errors=True)
+        st.success("Temporary files have been cleared.")
+
 st.title("Text Detection App")
+
+# Use session state to store the temporary directory path
+if 'temp_dir' not in st.session_state:
+    st.session_state.temp_dir = None
 
 uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
     
-    # Create a temporary directory for processing
-    temp_dir, input_path, output_path = create_temp_structure()
+    # Create a temporary directory for processing if it doesn't exist
+    if not st.session_state.temp_dir:
+        temp_dir, input_path, output_path = create_temp_structure()
+        st.session_state.temp_dir = temp_dir
+        st.session_state.input_path = input_path
+        st.session_state.output_path = output_path
+    else:
+        temp_dir = st.session_state.temp_dir
+        input_path = st.session_state.input_path
+        output_path = st.session_state.output_path
+
     st.write(f"Temp dir: {temp_dir}")
 
     input_file_path = os.path.join(input_path, uploaded_file.name)
@@ -93,7 +111,8 @@ if uploaded_file is not None:
                         label="Download Results",
                         data=zip_buffer.getvalue(),
                         file_name="text_detection_results.zip",
-                        mime="application/zip"
+                        mime="application/zip",
+                        on_click=lambda: clear_temp_folder(st.session_state.temp_dir)
                     )
                 else:
                     st.error("Result folder not found. The text detection might have failed.")
@@ -109,21 +128,14 @@ if uploaded_file is not None:
             status_text.empty()
 
     # Display directory contents for debugging
-    st.write(f"Contents of temp directory:")
-    for root, dirs, files in os.walk(temp_dir):
-        level = root.replace(temp_dir, '').count(os.sep)
-        indent = ' ' * 4 * (level)
-        st.write(f"{indent}{os.path.basename(root)}/")
-        subindent = ' ' * 4 * (level + 1)
-        for f in files:
-            st.write(f"{subindent}{f}")
+    if st.session_state.temp_dir:
+        st.write(f"Contents of temp directory:")
+        for root, dirs, files in os.walk(st.session_state.temp_dir):
+            level = root.replace(st.session_state.temp_dir, '').count(os.sep)
+            indent = ' ' * 4 * (level)
+            st.write(f"{indent}{os.path.basename(root)}/")
+            subindent = ' ' * 4 * (level + 1)
+            for f in files:
+                st.write(f"{subindent}{f}")
 
 st.write("Note: The download button will appear after running text detection.")
-
-# Cleanup function to be called when the Streamlit script reruns
-def cleanup():
-    if 'temp_dir' in locals():
-        shutil.rmtree(temp_dir, ignore_errors=True)
-
-# Register the cleanup function
-st.on_script_run.set(cleanup)
