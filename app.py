@@ -120,6 +120,12 @@ if uploaded_file is not None:
     #os.makedirs(osp(output_path, "result"), exist_ok=True)
     #os.makedirs(osp(output_path, "mask"), exist_ok=True)
     rc, stderr_output = run_bash_script(input_path, output_path, progress_placeholder, status_text)
+    mask_file_name = " || ".join(os.listdir('{temp_dir}/target_folder/mask'))
+    bbox_file_name = " || ".join(os.listdir('{temp_dir}/target_folder/bbox'))
+    result_file_name = " || ".join(os.listdir('{temp_dir}/target_folder/bbox'))
+    print(f'mask_file_name: {mask_file_name}')
+    print(f'bbox_file_name: {bbox_file_name}')
+    print(f'result_file_name: {result_file_name}')
     if rc == 0:
         st.write("Text detection completed successfully!")
         status_text.text("Text detection completed successfully!")
