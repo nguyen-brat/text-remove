@@ -120,9 +120,9 @@ if uploaded_file is not None:
     #os.makedirs(osp(output_path, "result"), exist_ok=True)
     #os.makedirs(osp(output_path, "mask"), exist_ok=True)
     rc, stderr_output = run_bash_script(input_path, output_path, progress_placeholder, status_text)
-    mask_file_name = " || ".join(os.listdir('{temp_dir}/target_folder/mask'))
-    bbox_file_name = " || ".join(os.listdir('{temp_dir}/target_folder/bbox'))
-    result_file_name = " || ".join(os.listdir('{temp_dir}/target_folder/bbox'))
+    mask_file_name = " || ".join(os.listdir(f'{temp_dir}/target_folder/mask'))
+    bbox_file_name = " || ".join(os.listdir(f'{temp_dir}/target_folder/bbox'))
+    result_file_name = " || ".join(os.listdir(f'{temp_dir}/target_folder/bbox'))
     print(f'mask_file_name: {mask_file_name}')
     print(f'bbox_file_name: {bbox_file_name}')
     print(f'result_file_name: {result_file_name}')
@@ -138,7 +138,8 @@ if uploaded_file is not None:
                 label="Download Results",
                 data=zip_buffer.getvalue(),
                 file_name="text_detection_results.zip",
-                mime="application/zip"
+                mime="application/zip",
+                on_click=lambda: clear_folder(temp_dir)
             )
         else:
             st.error("Result folder not found. The text detection might have failed.")
