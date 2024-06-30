@@ -5,27 +5,12 @@ import subprocess
 import zipfile
 import io
 import shutil
+import time
 import sys
 from PIL import Image
 import tempfile
-import uuid
 
 os.environ["HYDRA_FULL_ERROR"] = "1"
-
-def GET_PROJECT_ROOT():
-    count = 0
-    # goto the root folder of LogBar
-    current_abspath = os.path.abspath(__file__)
-    while True:
-        if count > 1000:
-            print("Can find root error")
-            sys.exit()
-        if os.path.split(current_abspath)[1] == 'text-remove':
-            project_root = current_abspath
-            break
-        else:
-            current_abspath = os.path.dirname(current_abspath)
-    return project_root
 
 def run_bash_script(input_image_path, output_path, progress_placeholder, status_text):
     bash_command = f"bash config/text_detection.sh -s {input_image_path} -t {output_path}"
@@ -37,7 +22,6 @@ def run_bash_script(input_image_path, output_path, progress_placeholder, status_
         progress += 0.1
         progress_placeholder.progress(min(progress, 1.0))
     
-    # Capture and display stderr
     stderr_output = process.stderr.read()
     if stderr_output:
         status_text.error("Error output:")
@@ -59,52 +43,37 @@ def zip_result_files(result_folder):
     
     return zip_buffer
 
-def clear_folder(folder_path):
-    for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)  # Remove file or symlink
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path, ignore_errors=True)  # Remove directory and its contents
-        except Exception as e:
-            print(f'Failed to delete {file_path}. Reason: {e}')
-            
-def create_persistent_structure():
-    # Create a unique directory name
-    unique_id = str(uuid.uuid4())
-    
-    # Create a persistent directory in the current working directory
-    persistent_dir = os.path.join(os.getcwd(), f"processing_{unique_id}")
+def create_temp_structure():
+    # Create a temporary directory
+    temp_dir = tempfile.mkdtemp()
     
     # Create test_folder
-    test_folder = os.path.join(persistent_dir, "test_folder")
+    test_folder = os.path.join(temp_dir, "test_folder")
     os.makedirs(test_folder, exist_ok=True)
     
     # Create target_folder with mask and result subdirectories
-    target_folder = os.path.join(persistent_dir, "target_folder")
+    target_folder = os.path.join(temp_dir, "target_folder")
     os.makedirs(os.path.join(target_folder, "mask"), exist_ok=True)
     os.makedirs(os.path.join(target_folder, "result"), exist_ok=True)
     os.makedirs(os.path.join(target_folder, "bbox"), exist_ok=True)
     
-    return persistent_dir, test_folder, target_folder
+    return temp_dir, test_folder, target_folder
 
 st.title("Text Detection App")
-# file_name = " || ".join(os.listdir('craft_pytorch'))
-# st.write(file_name)
+
 uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
     
-    # Create a persistent directory for processing
-    persistent_dir, input_path, output_path = create_persistent_structure()
-    st.write(f"Processing directory: {persistent_dir}")
+    # Create a temporary directory for processing
+    temp_dir, input_path, output_path = create_temp_structure()
+    st.write(f"Temp dir: {temp_dir}")
 
     input_file_path = os.path.join(input_path, uploaded_file.name)
     image = Image.open(uploaded_file)
     image.save(input_file_path)
-
+    
     if st.button("Run Text Detection"):
         progress_placeholder = st.empty()
         status_text = st.empty()
@@ -124,8 +93,7 @@ if uploaded_file is not None:
                         label="Download Results",
                         data=zip_buffer.getvalue(),
                         file_name="text_detection_results.zip",
-                        mime="application/zip",
-                        on_click=lambda: clear_folder(persistent_dir)
+                        mime="application/zip"
                     )
                 else:
                     st.error("Result folder not found. The text detection might have failed.")
@@ -141,9 +109,9 @@ if uploaded_file is not None:
             status_text.empty()
 
     # Display directory contents for debugging
-    st.write(f"Contents of {persistent_dir}:")
-    for root, dirs, files in os.walk(persistent_dir):
-        level = root.replace(persistent_dir, '').count(os.sep)
+    st.write(f"Contents of temp directory:")
+    for root, dirs, files in os.walk(temp_dir):
+        level = root.replace(temp_dir, '').count(os.sep)
         indent = ' ' * 4 * (level)
         st.write(f"{indent}{os.path.basename(root)}/")
         subindent = ' ' * 4 * (level + 1)
@@ -151,3 +119,11 @@ if uploaded_file is not None:
             st.write(f"{subindent}{f}")
 
 st.write("Note: The download button will appear after running text detection.")
+
+# Cleanup function to be called when the Streamlit script reruns
+def cleanup():
+    if 'temp_dir' in locals():
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+# Register the cleanup function
+st.on_script_run.set(cleanup)
