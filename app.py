@@ -107,7 +107,7 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file)
     # image.save(os.path.join(PROJECT_ROOT, input_file_path))
     image.save(input_file_path)
-    file_name = " || ".join(os.listdir(f'{temp_dir}'))
+    file_name = " || ".join(os.listdir(f'{temp_dir}/target_folder'))
     st.write(file_name)
     
     if st.button("Run Text Detection"):
