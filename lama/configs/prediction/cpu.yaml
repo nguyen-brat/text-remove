@@ -13,11 +13,7 @@ dataset:
 device: cpu
 out_key: inpainted
 
-<<<<<<< HEAD
-refine: False # refiner will only run if this is True
-=======
 refine: True # refiner will only run if this is True
->>>>>>> 802cadccf6d7bd53fda339610404aed96ff4bbfc
 refiner:
   gpu_ids: "" # the GPU ids of the machine to use. If only single GPU, use: "0,"
   modulo: ${dataset.pad_out_to_modulo}
@@ -25,8 +21,4 @@ refiner:
   lr: 0.002 # learning rate
   min_side: 512 # all sides of image on all scales should be >= min_side / sqrt(2)
   max_scales: 3 # max number of downscaling scales for the image-mask pyramid
-<<<<<<< HEAD
   px_budget: 1800000 # pixels budget. Any image will be resized to satisfy height*width <= px_budget
-=======
-  px_budget: 1800000 # pixels budget. Any image will be resized to satisfy height*width <= px_budget
->>>>>>> 802cadccf6d7bd53fda339610404aed96ff4bbfc
