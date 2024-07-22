@@ -6,6 +6,7 @@ cd text-remove
 conda create -n inpaint python==3.8
 conda activate inpaint
 sudo apt-get install libjpeg-dev zlib1g-dev
+sudo apt install unzip
 ```
 
 # Set up library
