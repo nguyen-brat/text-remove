@@ -37,7 +37,7 @@ PYTHONPATH=$(pwd) python3 draw_bb.py --src_img_path $src_path \
 
 cd lama
 export TORCH_HOME=$(pwd) && export PYTHONPATH=$(pwd)
-python3 ./bin/predict.py refine=True model.path=$(pwd)/big-lama \
+python3 ./bin/predict_cpu.py refine=True model.path=$(pwd)/big-lama \
                           indir=$save_path/mask \
                           outdir=$save_path/result \
                           dataset.img_suffix=.png > /dev/null

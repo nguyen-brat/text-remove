@@ -8,6 +8,7 @@ import shutil
 import sys
 from PIL import Image
 import tempfile
+import time
 
 os.environ["HYDRA_FULL_ERROR"] = "1"
 
@@ -26,8 +27,15 @@ def GET_PROJECT_ROOT():
             current_abspath = os.path.dirname(current_abspath)
     return project_root
 
-def run_bash_script(input_image_path, output_path, progress_placeholder, status_text):
-    bash_command = f"bash config/text_detection.sh -s {input_image_path} -t {output_path}"
+def run_bash_script(input_image_path, output_path, progress_placeholder, status_text, option='cuda'):
+    if option == 'cuda':
+        bash_command = f"bash config/cuda.sh -s {input_image_path} -t {output_path}"
+    elif option == 'cpu':
+        bash_command = f"bash config/cpu.sh -s {input_image_path} -t {output_path}"
+    elif option == 'classic':
+        bash_command = f"bash config/classic.sh -s {input_image_path} -t {output_path}"
+
+    t1 = time.time()
     process = subprocess.Popen(bash_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     
     progress = 0
@@ -43,6 +51,7 @@ def run_bash_script(input_image_path, output_path, progress_placeholder, status_
         st.code(stderr_output, language="bash")
     
     rc = process.wait()
+    st.text(f'the running process is finish in {time.time()-t1}')
     return rc, stderr_output
 
 def zip_result_files(result_folder):
@@ -85,68 +94,58 @@ def create_temp_structure():
     
     return temp_dir, test_folder, target_folder
 
-st.title("Text Detection App")
-# file_name = " || ".join(os.listdir('craft_pytorch'))
-# st.write(file_name)
+st.title("Text Remove App")
+
 uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
+
+option = st.selectbox(
+    "Choose the processing option",
+    ("cuda", "cpu", "classic"),
+    index=0  # Default to 'cuda'
+)
 
 if uploaded_file is not None:
     st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
     
-    # Create a temporary directory for processing
-    
-    # Save the uploaded file temporarily
-    temp_dir, input_path, output_path = create_temp_structure()
-    # st.write(f"Temp dir: {temp_dir}")
-    # os.makedirs(input_path, exist_ok=True)
-    # os.makedirs(osp(output_path, "result"), exist_ok=True)
-    # os.makedirs(osp(output_path, "mask"), exist_ok=True)
+    # Add a button to trigger the text detection process
+    if st.button("Run Text Remove"):
+        # Create a temporary directory for processing
+        temp_dir, input_path, output_path = create_temp_structure()
 
-    input_file_path = os.path.join(input_path, uploaded_file.name)
-    image = Image.open(uploaded_file)
-    # image.save(os.path.join(PROJECT_ROOT, input_file_path))
-    image.save(input_file_path)
-    # file_name = " || ".join(os.listdir(f'{temp_dir}/target_folder'))
-    # st.write(file_name)
+        input_file_path = os.path.join(input_path, uploaded_file.name.replace(" ", ""))
+        image = Image.open(uploaded_file)
+        image.save(input_file_path)
 
+        progress_placeholder = st.empty()
+        status_text = st.empty()
+        
+        status_text.text("Running text remove...")
+        # st.write(f'The input file path: {input_path}')
+        # st.write(f'The output file path: {output_path}')
 
-    progress_placeholder = st.empty()
-    status_text = st.empty()
-    
-    status_text.text("Running text detection...")
-    st.write(f'the input file path {input_path}')
-    st.write(f'the output file path {output_path}')
-    #os.makedirs(input_path, exist_ok=True)
-    #os.makedirs(osp(output_path, "result"), exist_ok=True)
-    #os.makedirs(osp(output_path, "mask"), exist_ok=True)
-    rc, stderr_output = run_bash_script(input_path, output_path, progress_placeholder, status_text)
-    mask_file_name = " || ".join(os.listdir(f'{temp_dir}/target_folder/mask'))
-    bbox_file_name = " || ".join(os.listdir(f'{temp_dir}/target_folder/bbox'))
-    result_file_name = " || ".join(os.listdir(f'{temp_dir}/target_folder/bbox'))
-    print(f'mask_file_name: {mask_file_name}')
-    print(f'bbox_file_name: {bbox_file_name}')
-    print(f'result_file_name: {result_file_name}')
-    if rc == 0:
-        st.write("Text detection completed successfully!")
-        status_text.text("Text detection completed successfully!")
-        result_folder = os.path.join(output_path, "result")
-        if os.path.exists(result_folder):
-            st.write("You can now download the results.")
-            # Add download button
-            zip_buffer = zip_result_files(result_folder)
-            st.download_button(
-                label="Download Results",
-                data=zip_buffer.getvalue(),
-                file_name="text_detection_results.zip",
-                mime="application/zip",
-                on_click=lambda: clear_folder(temp_dir)
-            )
+        rc, stderr_output = run_bash_script(input_path, output_path, progress_placeholder, status_text, option)
+
+        if rc == 0:
+            st.write("Text detection completed successfully!")
+            status_text.text("Text detection completed successfully!")
+            result_folder = os.path.join(output_path, "result")
+            if os.path.exists(result_folder):
+                st.write("You can now download the results.")
+                # Add download button
+                zip_buffer = zip_result_files(result_folder)
+                st.download_button(
+                    label="Download Results",
+                    data=zip_buffer.getvalue(),
+                    file_name="text_detection_results.zip",
+                    mime="application/zip",
+                    on_click=lambda: clear_folder(temp_dir)
+                )
+            else:
+                st.error("Result folder not found. The text detection might have failed.")
         else:
-            st.error("Result folder not found. The text detection might have failed.")
-    else:
-        st.error(f"Text detection failed with return code {rc}")
-        if stderr_output:
-            st.error("Error details:")
-            st.code(stderr_output, language="bash")
+            st.error(f"Text detection failed with return code please upload smaller image {rc}")
+            if stderr_output:
+                st.error("Error details:")
+                st.code(stderr_output, language="bash")
 
-st.write("Note: The download button will appear after running text detection.")
+st.write("Note: Click the 'Run Text Detection' button after uploading an image to start the process.")
