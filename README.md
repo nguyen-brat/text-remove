@@ -48,6 +48,9 @@ bash config/text_detection.sh -s test_folder -t target_test
 streamlit run app.py
 ```
 
+## App UI
+![plot](image/image.png)
+
 # Folder structure
 
 ### Description of Key Files and Directories
