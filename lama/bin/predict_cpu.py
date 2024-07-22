@@ -39,7 +39,7 @@ LOGGER = logging.getLogger(__name__)
 def main(
         #predict_config: OmegaConf# = hydra.utils.to_absolute_path('./configs/prediction/default.yaml')
 ):
-    predict_config = OmegaConf.load('configs/prediction/default.yaml')
+    predict_config = OmegaConf.load('configs/prediction/cpu.yaml')
 
     # Merge with command line arguments
     cli_config = OmegaConf.from_cli()

@@ -13,9 +13,13 @@ dataset:
 device: cuda
 out_key: inpainted
 
-refine: False # refiner will only run if this is True
+refine: True # refiner will only run if this is True
 refiner:
+<<<<<<< HEAD
   gpu_ids: "0, " # the GPU ids of the machine to use. If only single GPU, use: "0,"
+=======
+  gpu_ids: 0 # the GPU ids of the machine to use. If only single GPU, use: "0,"
+>>>>>>> 802cadccf6d7bd53fda339610404aed96ff4bbfc
   modulo: ${dataset.pad_out_to_modulo}
   n_iters: 15 # number of iterations of refinement for each scale
   lr: 0.002 # learning rate

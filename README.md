@@ -6,6 +6,7 @@ cd text-remove
 conda create -n inpaint python==3.8
 conda activate inpaint
 sudo apt-get install libjpeg-dev zlib1g-dev
+sudo apt install unzip
 ```
 
 # Set up library
@@ -16,7 +17,7 @@ pip install -r requirements.txt
 # Set up Craft
 
 ```bash
-cd CRAFT-pytorch
+cd craft_pytorch
 wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1Jk4eGD7crsqCCg9C9VjCLkMN3ze8kutZ' -O "craft_mlt_25k.pth"
 gdown 1XSaFwBkOaFOdtk4Ane3DFyJGPRw6v5bO
 cd ..
