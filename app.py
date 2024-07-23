@@ -101,7 +101,7 @@ uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "p
 option = st.selectbox(
     "Choose the processing option",
     ("cuda", "cpu", "classic"),
-    index=0  # Default to 'cuda'
+    index=2  # Default to 'cuda'
 )
 
 if uploaded_file is not None:
