@@ -40,7 +40,7 @@ def run_bash_script(input_image_path, output_path, progress_placeholder, status_
     
     progress = 0
     for line in process.stdout:
-        st.text(line.strip())
+        # st.text(line.strip())
         progress += 0.1
         progress_placeholder.progress(min(progress, 1.0))
     
@@ -48,7 +48,7 @@ def run_bash_script(input_image_path, output_path, progress_placeholder, status_
     stderr_output = process.stderr.read()
     if stderr_output:
         status_text.error("Error output:")
-        st.code(stderr_output, language="bash")
+        # st.code(stderr_output, language="bash")
     
     rc = process.wait()
     st.text(f'the running process is finish in {time.time()-t1}')
