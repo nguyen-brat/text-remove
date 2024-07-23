@@ -24,11 +24,11 @@ if [[ -z "$src_path" || -z "$save_path" ]]; then
 fi
 
 cd craft_pytorch
-PYTHONPATH=. TORCH_HOME=$(pwd)/craft_pytorch python3 test.py --trained_model=craft_mlt_25k.pth \
+PYTHONPATH=. TORCH_HOME=$(pwd)/craft_pytorch python3 test_cpu.py --trained_model=craft_mlt_25k.pth \
                                                               --refiner_model=craft_refiner_CTW1500.pth \
                                                               --test_folder="$src_path" \
                                                               --bbox_folder="$save_path/bbox" \
-                                                              --cuda True
+                                                              --cuda False
 
 cd ..
 PYTHONPATH=$(pwd) python3 draw_bb.py --src_img_path $src_path \
